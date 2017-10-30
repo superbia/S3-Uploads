@@ -115,7 +115,23 @@ class S3_Uploads {
 	public function wp_filter_delete_file( $file_path ) {
 		$dir = wp_upload_dir();
 
+		if ( $this->func_caller_is( 'wp_delete_file' ) ) {
+			return $file_path;
+		}
+
 		return str_replace( trailingslashit( $dir['basedir'] ), '', $file_path );
+	}
+
+	/**
+	 * Determine whether the specified function exists in the call stack.
+	 *
+	 * @param string $function The function name to check.
+	 * @return bool True if the specified function is in the call stack; Otherwise false.
+	 */
+	protected function func_caller_is( $function ) {
+		$stack = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
+		$functions = wp_list_pluck( $stack, 'function' );
+		return in_array( $function, array_unique( $functions ) );
 	}
 
 	public function get_s3_url() {
